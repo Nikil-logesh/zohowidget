@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Performance Tracker</title>
+    <script src="https://js.zohostatic.com/crm/javascript/zcrmjssdk.js"></script>
+    <script src="https://live.zwidgets.com/js-sdk/1.4/ZohoEmbededAppSDK.min.js"></script>
+    <style>
+      :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --info-color: #4299e1;
+        --neutral-color: #718096;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: #333;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .container {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        min-height: calc(100vh - 40px);
+        box-sizing: border-box;
+      }
+      
+      .summary-section {
+        margin: 15px 0;
+        padding: 12px;
+        background: rgba(var(--primary-color-rgb), 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-color);
+      }
+      .section-number {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 25px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-right: 10px;
+      }
+      .section-title {
+        color: var(--primary-color);
+        font-size: 16px;
+      }
+      .summary-point {
+        margin: 10px 0;
+        padding: 8px 0;
+      }
+      .point-number {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-right: 8px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 20px 0;
+      }
+      .header h2 {
+        color: #4a5568;
+        margin-bottom: 10px;
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .header p {
+        color: #718096;
+        font-size: 18px;
+        margin: 0;
+      }
+      .form-group {
+        margin-bottom: 25px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 16px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+      }
+      input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+      }
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      
+      /* Secondary actions styling */
+      #secondaryActions {
+        border-top: 2px solid rgba(var(--primary-color-rgb), 0.1);
+        padding-top: 15px;
+        margin-top: 15px;
+        animation: slideDown 0.3s ease;
+      }
+      
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      #secondaryActions .btn {
+        font-size: 14px;
+        padding: 12px 20px;
+        min-width: 160px;
+      }
+      
+      #secondaryActions .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      #secondaryActions .btn:disabled:hover {
+        transform: none;
+        box-shadow: none;
+      }
+      .btn {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        margin: 20px 0;
+      }
+      .spinner {
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .result {
+        margin-top: 30px;
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        display: none;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      }
+      .result h3 {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .mood-indicator {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      }
+      .mood-good {
+        background: linear-gradient(45deg, var(--success-color), #38a169);
+        color: white;
+      }
+      .mood-neutral {
+        background: linear-gradient(45deg, var(--warning-color), #dd6b20);
+        color: white;
+      }
+      .mood-bad {
+        background: linear-gradient(45deg, var(--danger-color), #e53e3e);
+        color: white;
+      }
+      .error {
+        background: linear-gradient(45deg, #fed7d7, #feb2b2);
+        color: #742a2a;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+        display: none;
+        border-left: 5px solid #e53e3e;
+      }
+      .success {
+        background: linear-gradient(45deg, #c6f6d5, #9ae6b4);
+        color: #22543d;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+        display: none;
+        border-left: 5px solid #38a169;
+      }
+      .record-info {
+        background: linear-gradient(45deg, #bee3f8, #90cdf4);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        font-size: 16px;
+        color: #2a4365;
+        border-left: 5px solid #4299e1;
+      }
+      .comments-section {
+        max-height: 500px;
+        overflow-y: auto;
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 15px;
+        margin: 20px 0;
+        border: 2px solid #e2e8f0;
+      }
+      .comment-item {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 15px;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+      }
+      .comment-item:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+      }
+      .comment-header {
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 10px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .comment-text {
+        color: #2d3748;
+        line-height: 1.6;
+        font-size: 15px;
+      }
+      .comment-text a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 2px 6px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 5px;
+      }
+      .comment-text a:hover {
+        background: rgba(102, 126, 234, 0.2);
+      }
+      .timestamp-link {
+        background: linear-gradient(45deg, #fed7e2, #fbb6ce);
+        color: #702459;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none !important;
+      }
+      .video-link {
+        background: linear-gradient(45deg, #fef5e7, #feebc8);
+        color: #744210;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+      
+      /* New styles for enhanced features */
+      .video-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+        border: 2px solid #e2e8f0;
+      }
+      
+      .action-btn {
+        background: linear-gradient(45deg, var(--info-color), var(--primary-color));
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+      }
+      
+      .action-btn.watch-btn {
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+      }
+      
+      .action-btn.stats-btn {
+        background: linear-gradient(45deg, var(--success-color), #38a169);
+      }
+      
+      .action-btn.trending-btn {
+        background: linear-gradient(45deg, var(--warning-color), #dd6b20);
+      }
+      
+      .video-info-panel {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        border-left: 4px solid var(--info-color);
+        display: none;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      }
+      
+      .video-info-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #4a5568;
+      }
+      
+      .video-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      
+      .video-stat:last-child {
+        border-bottom: none;
+      }
+      
+      .stat-label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+      
+      .stat-value {
+        color: var(--primary-color);
+        font-weight: 700;
+      }
+      
+      .video-classification {
+        background: linear-gradient(45deg, #f0fff4, #c6f6d5);
+        border: 2px solid var(--success-color);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      
+      .classification-title {
+        color: var(--success-color);
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      
+      .classification-badge {
+        display: inline-block;
+        background: var(--success-color);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin: 5px;
+      }
+      
+      .themes-section {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        border-left: 4px solid var(--warning-color);
+      }
+      
+      .themes-header {
+        color: var(--warning-color);
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .theme-item {
+        background: linear-gradient(45deg, #fef5e7, #feebc8);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        border-left: 3px solid var(--warning-color);
+      }
+      
+      .theme-title {
+        font-weight: 700;
+        color: #744210;
+        margin-bottom: 5px;
+      }
+      
+      .theme-description {
+        color: #8d4e14;
+        line-height: 1.5;
+      }
+      
+      /* Comment Categorization Styles */
+      .comment-categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      
+      .category-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+        cursor: pointer;
+      }
+      
+      .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      }
+      
+      .category-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+      }
+      
+      .category-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+      
+      .category-count {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 4px;
+      }
+      
+      .category-percentage {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>📊 Influencer Performance Tracker</h2>
+        <p>Analyze audience sentiment from YouTube comments</p>
+      </div>
+      
+      <div id="recordInfo" class="record-info" style="display: none;">
+        <strong>Current Partner:</strong> <span id="partnerName">Loading...</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="videoId">YouTube Video ID:</label>
+        <input type="text" id="videoId" placeholder="Enter YouTube Video ID (e.g., dQw4w9WgXcQ)">
+      </div>
+      
+      <div class="button-grid">
+        <button id="analyzeBtn" class="btn" onclick="analyzeComments()">🔍 Analyze Comments</button>
+
+      </div>
+      
+      <!-- Secondary Action Buttons (Initially Hidden) -->
+      <div id="secondaryActions" class="button-grid" style="display: none; margin-top: 10px; gap: 10px;">
+        <button id="showCommentsBtn" class="btn" onclick="toggleComments()" style="background: linear-gradient(45deg, #48bb78, #38a169);">
+          📝 Show Comments
+        </button>
+        <button id="categorizeBtn" class="btn" style="background: linear-gradient(45deg, #8b5cf6, #a855f7);">
+          🏷️ Categorize Comments
+        </button>
+      </div>
+      
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+      </div>
+      
+      <div id="pushStatus" class="record-info" style="display: none; background: linear-gradient(45deg, #fef5e7, #feebc8); color: #744210; border-left: 5px solid #ed8936;">
+        <strong>  Analysis Status:</strong> <span id="pushStatusText">Ready for analysis</span>
+      </div>
+      
+      <div id="result" class="result">
+        <h3>📈 Analysis Results:</h3>
+        
+        <!-- Video Actions Panel -->
+        <div id="videoActions" class="video-actions" style="display: none;">
+          <button class="action-btn watch-btn" onclick="watchVideo()">
+            🎥 Watch Video
+          </button>
+          <button class="action-btn stats-btn" onclick="showVideoStats()">
+            📊 Video Stats
+          </button>
+          <button class="action-btn trending-btn" onclick="showTrendingInfo()">
+            🔥 Trending Info
+          </button>
+          <button class="action-btn" onclick="showVideoDetails()">
+            📋 Full Details
+          </button>
+        </div>
+        
+        <!-- Video Info Panels -->
+        <div id="videoStatsPanel" class="video-info-panel">
+          <div class="video-info-header">
+            <span style="margin-right: 10px;">📊</span> Video Statistics
+          </div>
+          <div id="videoStatsContent"></div>
+        </div>
+        
+        <div id="trendingPanel" class="video-info-panel">
+          <div class="video-info-header">
+            <span style="margin-right: 10px;">🔥</span> Trending & Engagement
+          </div>
+          <div id="trendingContent"></div>
+        </div>
+        
+        <div id="videoDetailsPanel" class="video-info-panel">
+          <div class="video-info-header">
+            <span style="margin-right: 10px;">📋</span> Complete Video Information
+          </div>
+          <div id="videoDetailsContent"></div>
+        </div>
+        
+        <!-- Video Classification -->
+        <div id="videoClassification" class="video-classification" style="display: none;">
+          <div class="classification-title">🎯 Video Classification</div>
+          <div id="classificationContent"></div>
+        </div>
+        
+        <div id="commentsSection" style="display: none;">
+          <h4 style="color: #4a5568; font-size: 20px; margin-bottom: 15px;">📝 Fetched Comments:</h4>
+          <div id="commentsList" class="comments-section"></div>
+        </div>
+        
+        <!-- Enhanced Sentiment Summary -->
+        <div id="sentimentSummary"></div>
+        
+        <!-- Key Themes Section -->
+        <div id="themesSection" class="themes-section" style="display: none;">
+          <div class="themes-header">
+            <span style="margin-right: 10px;">🔑</span> Key Themes & Sentiment Trends
+          </div>
+          <div id="themesContent"></div>
+        </div>
+        
+        <div id="moodIndicator"></div>
+        <div id="lastUpdated"></div>
+      </div>
+      
+      <div id="error" class="error"></div>
+      <div id="success" class="success"></div>
+    </div>
+    
+    <script>
+      let currentRecord = null;
+      let entityId = null;
+      let analysisResults = null; // Store analysis results for pushing to CRM
+      
+      // Initialize the widget
+      function initializeWidget() {
+        console.log('Initializing Influencer Performance Tracker...');
+        
+        if (typeof ZOHO !== 'undefined' && ZOHO.embeddedApp) {
+          console.log('ZOHO SDK loaded successfully');
+          
+          ZOHO.embeddedApp.on('PageLoad', function(data) {
+            console.log('Widget loaded:', data);
+            entityId = data.EntityId;
+            loadRecordData(data.Entity);
+          });
+          
+          ZOHO.embeddedApp.init();
+        } else {
+          console.log('ZOHO SDK not available, retrying...');
+          setTimeout(initializeWidget, 500);
+        }
+      }
+      
+      // Wait for DOM to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          initializeWidget();
+        });
+      } else {
+        initializeWidget();
+      }
+      
+      // Load current record data
+      async function loadRecordData(entityName = 'tocheckthewidgetforcampaign__Partners') {
+        try {
+          console.log('=== LOADING RECORD DATA ===');
+          console.log('Entity name:', entityName);
+          console.log('Entity ID:', entityId);
+          
+          if (!ZOHO || !ZOHO.CRM || !ZOHO.CRM.API) {
+            throw new Error('ZOHO CRM API not available');
+          }
+          
+          // Try multiple entity names if needed
+          const entitiesToTry = [entityName, 'tocheckthewidgetforcampaign__Partners', 'finale__Partners', 'Partners', 'Accounts'];
+          let record = null;
+          let usedEntity = null;
+          
+          for (const entity of entitiesToTry) {
+            try {
+              console.log(`Trying entity: ${entity}`);
+              record = await ZOHO.CRM.API.getRecord({
+                Entity: entity,
+                RecordID: entityId
+              });
+              
+              if (record && record.data && record.data.length > 0) {
+                usedEntity = entity;
+                console.log(`✅ Successfully loaded record with entity: ${entity}`);
+                break;
+              }
+            } catch (err) {
+              console.log(`❌ Failed with entity ${entity}:`, err.message);
+            }
+          }
+          
+          if (!record || !record.data || record.data.length === 0) {
+            throw new Error('Failed to fetch record with any entity type');
+          }
+          
+          currentRecord = record.data[0];
+          currentRecord._entityType = usedEntity;
+          
+          console.log('✅ Record loaded successfully');
+          console.log('Record name:', currentRecord.Name);
+          console.log('Available fields count:', Object.keys(currentRecord).length);
+          console.log('First 10 fields:', Object.keys(currentRecord).slice(0, 10));
+          
+          // Update UI
+          document.getElementById('partnerName').textContent = 
+            currentRecord.Name || currentRecord.Account_Name || 'N/A';
+          document.getElementById('recordInfo').style.display = 'block';
+          
+          // Pre-fill video ID if available (check both possible field names)
+          const videoIdField = currentRecord.tocheckthewidgetforcampaign__Latest_Video_ID || currentRecord['tocheckthewidgetforcampaign__Latest_Video_I']; // Handle potential truncation
+          if (videoIdField) {
+            document.getElementById('videoId').value = videoIdField;
+            console.log('✅ Pre-filled video ID:', videoIdField);
+          }
+          
+        } catch (error) {
+          console.error('❌ Error loading record:', error);
+          showError('Failed to load record data: ' + error.message + 
+            '\n\nPlease ensure you have the correct permissions and the record exists.');
+        }
+      }
+      
+      // Get CRM variables using correct API
+      async function getCrmVariable(variableName) {
+        try {
+          console.log(`Getting CRM variable: ${variableName}`);
+          
+          // Try multiple methods to get organization variables
+          let response;
+          
+          // Method 1: Direct API call
+          try {
+            response = await ZOHO.CRM.API.getOrgVariable(variableName);
+            console.log(`Method 1 response for ${variableName}:`, response);
+            
+            if (response && response.Success && response.Success.Content) {
+              return response.Success.Content;
+            }
+          } catch (err) {
+            console.log(`Method 1 failed for ${variableName}:`, err);
+          }
+          
+          // Method 2: Try alternative API structure
+          try {
+            response = await ZOHO.CRM.API.getOrgVariable({
+              variable: variableName
+            });
+            console.log(`Method 2 response for ${variableName}:`, response);
+            
+            if (response && response.Success && response.Success.Content) {
+              return response.Success.Content;
+            }
+          } catch (err) {
+            console.log(`Method 2 failed for ${variableName}:`, err);
+          }
+          
+          // Method 3: Try with CONN API if available
+          try {
+            if (ZOHO.CRM.CONNECTION) {
+              response = await ZOHO.CRM.CONNECTION.invoke('get_org_variable', {
+                variable_name: variableName
+              });
+              console.log(`Method 3 response for ${variableName}:`, response);
+              
+              if (response && response.details) {
+                return response.details;
+              }
+            }
+          } catch (err) {
+            console.log(`Method 3 failed for ${variableName}:`, err);
+          }
+          
+          console.warn(`All methods failed for variable ${variableName}`);
+          return null;
+          
+        } catch (error) {
+          console.error(`Error getting variable ${variableName}:`, error);
+          return null;
+        }
+      }
+      
+      // Main analyze function
+      async function analyzeComments() {
+        const videoId = document.getElementById('videoId').value.trim();
+        
+        if (!videoId) {
+          showError('Please enter a YouTube Video ID');
+          return;
+        }
+        
+        showLoading(true);
+        hideMessages();
+        
+        try {
+          console.log('=== STARTING ANALYSIS ===');
+          
+          // Get API keys
+          const youtubeApiKey = await getCrmVariable('tocheckthewidgetforcampaign__youtube_api_key');
+          const geminiApiKey = await getCrmVariable('tocheckthewidgetforcampaign__gemini_api_key');
+          
+          if (!youtubeApiKey) {
+            throw new Error('YouTube API key not found in CRM variables');
+          }
+          
+          if (!geminiApiKey) {
+            throw new Error('Gemini API key not found in CRM variables');
+          }
+          
+          // Fetch comments
+          const comments = await fetchYouTubeComments(videoId, youtubeApiKey);
+          console.log(`Fetched ${comments.length} comments`);
+          
+          if (comments.length === 0) {
+            throw new Error('No comments found for this video');
+          }
+          
+          // Update status with comment count
+          document.getElementById('pushStatus').style.display = 'block';
+          document.getElementById('pushStatusText').textContent = 
+            `Fetched ${comments.length} comments - Now analyzing sentiment...`;
+          
+          // Show comments
+          showComments(comments);
+          
+          // Analyze sentiment
+          const sentimentResult = await analyzeSentimentWithGemini(comments, geminiApiKey);
+          console.log('Sentiment result:', sentimentResult);
+          
+          // Store results for display
+          analysisResults = {
+            summary: sentimentResult.summary,
+            mood: sentimentResult.mood,
+            videoId: videoId,
+            comments: comments,
+            analysisDate: new Date().toISOString()
+          };
+          
+          // Show results
+          showResults(sentimentResult);
+          showSuccess('Analysis completed successfully!');
+          
+        } catch (error) {
+          console.error('Analysis error:', error);
+          showError(error.message || 'Analysis failed');
+        } finally {
+          showLoading(false);
+        }
+      }
+      
+      // Fetch YouTube comments - ALL comments including replies with comprehensive strategy
+      async function fetchYouTubeComments(videoId, apiKey) {
+        let allComments = [];
+        const uniqueComments = new Set(); // To avoid duplicates
+        
+        console.log('Starting comprehensive fetch of ALL comments (including replies) for video:', videoId);
+        
+        // First, get video details for enhanced features
+        await fetchVideoDetails(videoId, apiKey);
+        
+        // Strategy 1: Fetch with "relevance" order
+        console.log('🔍 Strategy 1: Fetching comments ordered by relevance...');
+        const relevanceComments = await fetchCommentsWithOrder(videoId, apiKey, 'relevance', 50);
+        relevanceComments.forEach(comment => {
+          if (!uniqueComments.has(comment)) {
+            uniqueComments.add(comment);
+            allComments.push(comment);
+          }
+        });
+        
+        console.log(`✅ Strategy 1 complete: ${relevanceComments.length} comments (${allComments.length} unique so far)`);
+        
+        // Strategy 2: Fetch with "time" order
+        console.log('🔍 Strategy 2: Fetching comments ordered by time...');
+        const timeComments = await fetchCommentsWithOrder(videoId, apiKey, 'time', 30);
+        timeComments.forEach(comment => {
+          if (!uniqueComments.has(comment)) {
+            uniqueComments.add(comment);
+            allComments.push(comment);
+          }
+        });
+        
+        console.log(`✅ Strategy 2 complete: ${timeComments.length} comments (${allComments.length} unique so far)`);
+        
+        // Strategy 3: Try to get even more by fetching individual comment threads that might have many replies
+        if (allComments.length < 800) {
+          console.log('🔍 Strategy 3: Attempting to fetch more replies from popular threads...');
+          await fetchAdditionalReplies(videoId, apiKey, allComments, uniqueComments);
+        }
+        
+        console.log(`✅ Final result: Successfully fetched ${allComments.length} unique comments (including all replies)`);
+        
+        // Reset loading message
+        const loadingElement = document.querySelector('#loading p');
+        if (loadingElement) {
+          loadingElement.textContent = 'Processing...';
+        }
+        
+        return allComments;
+      }
+      
+      // Global variable to store video details
+      let currentVideoDetails = null;
+      
+      // Fetch video details for enhanced features
+      async function fetchVideoDetails(videoId, apiKey) {
+        try {
+          console.log('🎬 Fetching video details...');
+          
+          const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,status&id=${videoId}&key=${apiKey}`;
+          const response = await fetch(url);
+          const data = await response.json();
+          
+          if (response.ok && data.items && data.items.length > 0) {
+            currentVideoDetails = data.items[0];
+            console.log('✅ Video details fetched successfully');
+            
+            // Show video actions once we have the details
+            document.getElementById('videoActions').style.display = 'grid';
+            
+            return currentVideoDetails;
+          } else {
+            console.warn('⚠️ Could not fetch video details');
+            return null;
+          }
+        } catch (error) {
+          console.error('❌ Error fetching video details:', error);
+          return null;
+        }
+      }
+      
+      // Helper function to fetch comments with specific order
+      async function fetchCommentsWithOrder(videoId, apiKey, order, maxPages) {
+        let comments = [];
+        let nextPageToken = null;
+        let pageCount = 0;
+        
+        do {
+          pageCount++;
+          console.log(`  Fetching ${order} page ${pageCount}...`);
+          
+          let url = `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&videoId=${videoId}&key=${apiKey}&maxResults=100&order=${order}`;
+          if (nextPageToken) {
+            url += `&pageToken=${nextPageToken}`;
+          }
+          
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (!response.ok) {
+              console.warn(`  ${order} fetch failed on page ${pageCount}:`, data.error?.message);
+              break;
+            }
+            
+            // Extract all comments and replies from this page
+            const pageComments = [];
+            
+            data.items?.forEach(thread => {
+              // Add the top-level comment
+              const topLevelComment = thread.snippet.topLevelComment.snippet.textDisplay;
+              pageComments.push(topLevelComment);
+              
+              // Add all replies if they exist
+              if (thread.replies && thread.replies.comments) {
+                thread.replies.comments.forEach(reply => {
+                  const replyText = reply.snippet.textDisplay;
+                  pageComments.push(replyText);
+                });
+              }
+            });
+            
+            comments = comments.concat(pageComments);
+            nextPageToken = data.nextPageToken;
+            
+            console.log(`    Page ${pageCount}: +${pageComments.length} comments. ${order} total: ${comments.length}`);
+            
+            // Update loading message
+            const loadingElement = document.querySelector('#loading p');
+            if (loadingElement) {
+              loadingElement.textContent = `Processing... Fetched ${comments.length} comments using ${order} order (page ${pageCount})`;
+            }
+            
+            // Delay to avoid rate limiting
+            if (nextPageToken && pageCount < maxPages) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+          } catch (error) {
+            console.error(`  Error in ${order} fetch page ${pageCount}:`, error);
+            break;
+          }
+          
+        } while (nextPageToken && pageCount < maxPages);
+        
+        return comments;
+      }
+      
+      // Helper function to fetch additional replies from threads that might have more
+      async function fetchAdditionalReplies(videoId, apiKey, allComments, uniqueComments) {
+        try {
+          // Get comment thread IDs first
+          const threadsUrl = `https://www.googleapis.com/youtube/v3/commentThreads?part=id&videoId=${videoId}&key=${apiKey}&maxResults=50&order=relevance`;
+          const threadsResponse = await fetch(threadsUrl);
+          const threadsData = await threadsResponse.json();
+          
+          if (threadsResponse.ok && threadsData.items) {
+            let additionalCount = 0;
+            
+            // Check first 20 threads for additional replies
+            const threadsToCheck = threadsData.items.slice(0, 20);
+            
+            for (let i = 0; i < threadsToCheck.length; i++) {
+              const threadId = threadsToCheck[i].id;
+              
+              try {
+                // Fetch this specific thread with all its replies
+                const threadUrl = `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet,replies&id=${threadId}&key=${apiKey}`;
+                const threadResponse = await fetch(threadUrl);
+                const threadData = await threadResponse.json();
+                
+                if (threadResponse.ok && threadData.items && threadData.items[0]) {
+                  const thread = threadData.items[0];
+                  
+                  // Check if there are replies we haven't captured
+                  if (thread.replies && thread.replies.comments) {
+                    thread.replies.comments.forEach(reply => {
+                      const replyText = reply.snippet.textDisplay;
+                      if (!uniqueComments.has(replyText)) {
+                        uniqueComments.add(replyText);
+                        allComments.push(replyText);
+                        additionalCount++;
+                      }
+                    });
+                  }
+                }
+                
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+              } catch (threadError) {
+                console.warn(`    Error fetching thread ${threadId}:`, threadError);
+              }
+            }
+            
+            console.log(`  Strategy 3 complete: Found ${additionalCount} additional replies`);
+          }
+          
+        } catch (error) {
+          console.warn('  Strategy 3 failed:', error);
+        }
+      }
+      
+      // Show comments in UI with enhanced formatting and pagination (FIXED formatting)
+      function showComments(comments) {
+        const commentsList = document.getElementById('commentsList');
+        const commentsSection = document.getElementById('commentsSection');
+        
+        // Update section header with total count
+        const sectionHeader = commentsSection.querySelector('h4');
+        if (sectionHeader) {
+          sectionHeader.innerHTML = `📝 Fetched Comments: <span style="color: var(--primary-color); font-weight: 700;">${comments.length} Total Comments</span>`;
+        }
+        
+        // Show first 50 comments initially for better performance
+        const commentsToShow = comments.slice(0, 50);
+        const hasMore = comments.length > 50;
+        
+        const commentsHtml = commentsToShow.map((comment, index) => {
+          // Clean and format the comment text with FIXED regex order
+          let formattedComment = comment
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          
+          // IMPORTANT: Apply formatters in the correct order to avoid conflicts
+          
+          // 1. First handle YouTube URLs (most specific)
+          formattedComment = formattedComment
+            .replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+(?:&t=\d+s?)?)/g, '<a href="$1" target="_blank" class="video-link">🎥 Video Link</a>');
+          
+          // 2. Then handle standalone timestamps (but NOT those already inside links)
+          formattedComment = formattedComment
+            .replace(/(?<!href="[^"]*"[^>]*>.*?)(\d{1,2}:\d{2}(?::\d{2})?)(?![^<]*<\/a>)/g, '<span class="timestamp-link">⏱️ $1</span>');
+          
+          // 3. Then handle @mentions
+          formattedComment = formattedComment
+            .replace(/@([\w.-]+)/g, '<span style="background: linear-gradient(45deg, #e6fffa, #b2f5ea); color: #234e52; padding: 2px 6px; border-radius: 5px; font-weight: 600;">@$1</span>');
+          
+          // 4. Finally handle hashtags
+          formattedComment = formattedComment
+            .replace(/#([\w]+)/g, '<span style="background: linear-gradient(45deg, #fef5e7, #feebc8); color: #744210; padding: 2px 6px; border-radius: 5px; font-weight: 600;">#$1</span>');
+          
+          return `<div class="comment-item">
+            <div class="comment-header">Comment ${index + 1} of ${comments.length}</div>
+            <div class="comment-text">${formattedComment}</div>
+          </div>`;
+        }).join('');
+        
+        // Add "Show More" button if there are more comments
+        const showMoreButton = hasMore ? 
+          `<div style="text-align: center; margin: 20px 0;">
+            <button onclick="showAllComments()" class="btn" style="background: linear-gradient(45deg, var(--info-color), var(--primary-color)); padding: 10px 20px; font-size: 14px;">
+              📋 Show All ${comments.length} Comments
+            </button>
+            <p style="color: #718096; margin-top: 10px; font-size: 14px;">
+              Showing first 50 comments. Click above to view all ${comments.length} comments.
+            </p>
+          </div>` : '';
+        
+        commentsList.innerHTML = commentsHtml + showMoreButton;
+        
+        // Don't automatically show comments section - wait for user to click "Show Comments"
+        // commentsSection.style.display = 'block';
+        // document.getElementById('result').style.display = 'block';
+        
+        // Store all comments globally for "Show All" functionality
+        window.allComments = comments;
+        
+        // Enable the "Show Comments" button and show secondary actions
+        const showCommentsBtn = document.getElementById('showCommentsBtn');
+        const secondaryActions = document.getElementById('secondaryActions');
+        if (showCommentsBtn) {
+          showCommentsBtn.disabled = false;
+          showCommentsBtn.style.opacity = '1';
+          secondaryActions.style.display = 'flex';
+        }
+      }
+      
+      // Function to show all comments (FIXED formatting)
+      function showAllComments() {
+        const commentsList = document.getElementById('commentsList');
+        
+        const allCommentsHtml = window.allComments.map((comment, index) => {
+          // Apply the same FIXED formatting logic
+          let formattedComment = comment
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          
+          // Apply formatters in correct order
+          formattedComment = formattedComment
+            .replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+(?:&t=\d+s?)?)/g, '<a href="$1" target="_blank" class="video-link">🎥 Video Link</a>')
+            .replace(/(?<!href="[^"]*"[^>]*>.*?)(\d{1,2}:\d{2}(?::\d{2})?)(?![^<]*<\/a>)/g, '<span class="timestamp-link">⏱️ $1</span>')
+            .replace(/@([\w.-]+)/g, '<span style="background: linear-gradient(45deg, #e6fffa, #b2f5ea); color: #234e52; padding: 2px 6px; border-radius: 5px; font-weight: 600;">@$1</span>')
+            .replace(/#([\w]+)/g, '<span style="background: linear-gradient(45deg, #fef5e7, #feebc8); color: #744210; padding: 2px 6px; border-radius: 5px; font-weight: 600;">#$1</span>');
+          
+          return `<div class="comment-item">
+            <div class="comment-header">Comment ${index + 1} of ${window.allComments.length}</div>
+            <div class="comment-text">${formattedComment}</div>
+          </div>`;
+        }).join('');
+        
+        const collapseButton = `<div style="text-align: center; margin: 20px 0;">
+          <button onclick="showComments(window.allComments)" class="btn" style="background: linear-gradient(45deg, var(--warning-color), var(--danger-color)); padding: 10px 20px; font-size: 14px;">
+            🔼 Show Less (First 50 Comments)
+          </button>
+        </div>`;
+        
+        commentsList.innerHTML = allCommentsHtml + collapseButton;
+      }
+      
+      // Toggle comments visibility
+      function toggleComments() {
+        const commentsSection = document.getElementById('commentsSection');
+        const showCommentsBtn = document.getElementById('showCommentsBtn');
+        
+        if (commentsSection.style.display === 'none' || commentsSection.style.display === '') {
+          commentsSection.style.display = 'block';
+          showCommentsBtn.innerHTML = '📝 Hide Comments';
+          showCommentsBtn.style.background = 'linear-gradient(45deg, #f56565, #e53e3e)';
+          
+          // Scroll to comments section
+          commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          commentsSection.style.display = 'none';
+          showCommentsBtn.innerHTML = '📝 Show Comments';
+          showCommentsBtn.style.background = 'linear-gradient(45deg, #48bb78, #38a169)';
+        }
+      }
+      
+      // Show results with enhanced formatting and themes
+      function showResults(sentimentResult) {
+        // Clean and format the sentiment summary
+        let formattedSummary = sentimentResult.summary
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Convert **text** to <strong>text</strong>
+          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Convert *text* to <em>text</em>
+          .replace(/(\d+)\.\s*\*\*(.*?)\*\*/g, '<div class="summary-section"><span class="section-number">$1.</span><strong class="section-title">$2</strong></div>') // Format numbered sections
+          .replace(/(\d+)\.\s*/g, '<div class="summary-point"><span class="point-number">$1.</span>') // Format numbered points
+          .replace(/\n/g, '</div><br>') // Handle line breaks
+          .replace(/<br><\/div>/g, '</div>'); // Clean up formatting
+
+        document.getElementById('sentimentSummary').innerHTML = 
+          `<div style="background: rgba(255, 255, 255, 0.9); padding: 25px; border-radius: 15px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
+            <div style="color: #4a5568; font-size: 20px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center;">
+              <span style="margin-right: 10px;">📊</span> Sentiment Analysis Report
+            </div>
+            <div style="color: #2d3748; line-height: 1.8; font-size: 16px;">${formattedSummary}</div>
+          </div>`;
+        
+        // Display themes if available
+        if (sentimentResult.themes && sentimentResult.themes.length > 0) {
+          const themesHtml = sentimentResult.themes.map(theme => `
+            <div class="theme-item">
+              <div class="theme-title">${theme.title}</div>
+              <div class="theme-description">${theme.description}</div>
+            </div>
+          `).join('');
+          
+          // Add sentiment trends if available
+          const trendsHtml = sentimentResult.trends ? `
+            <div class="theme-item" style="border-left-color: var(--info-color); background: linear-gradient(45deg, #ebf8ff, #bee3f8);">
+              <div class="theme-title" style="color: var(--info-color);">📈 Sentiment Trends</div>
+              <div class="theme-description" style="color: #2c5282;">${sentimentResult.trends}</div>
+            </div>
+          ` : '';
+          
+          document.getElementById('themesContent').innerHTML = themesHtml + trendsHtml;
+          document.getElementById('themesSection').style.display = 'block';
+        }
+        
+        const moodClass = `mood-${sentimentResult.mood.toLowerCase()}`;
+        document.getElementById('moodIndicator').innerHTML = 
+          `<div class="mood-indicator ${moodClass}">🎯 Overall Mood: ${sentimentResult.mood}</div>`;
+        
+        document.getElementById('lastUpdated').innerHTML = 
+          `<div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.7); border-radius: 10px; color: #718096;">
+            <small>📅 Last Updated: ${new Date().toLocaleString()}</small>
+          </div>`;
+        
+        document.getElementById('result').style.display = 'block';
+        
+        // Classify video with enhanced details
+        if (currentVideoDetails) {
+          classifyVideo(currentVideoDetails, sentimentResult);
+        }
+        
+        // Show analysis status
+        if (analysisResults) {
+          document.getElementById('pushStatus').style.display = 'block';
+          document.getElementById('pushStatusText').textContent = 
+            `Analysis complete - ${analysisResults.comments ? analysisResults.comments.length : 0} comments analyzed with ${analysisResults.mood} sentiment`;
+        }
+      }
+      
+      // UI helper functions
+      function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+        document.getElementById('analyzeBtn').disabled = show;
+      }
+      
+      function showError(message) {
+        document.getElementById('error').textContent = message;
+        document.getElementById('error').style.display = 'block';
+      }
+      
+      function showSuccess(message) {
+        document.getElementById('success').textContent = message;
+        document.getElementById('success').style.display = 'block';
+      }
+      
+      function hideMessages() {
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('success').style.display = 'none';
+        document.getElementById('result').style.display = 'none';
+        document.getElementById('commentsSection').style.display = 'none';
+        document.getElementById('pushStatus').style.display = 'none';
+        
+        // Hide secondary actions and reset buttons
+        const secondaryActions = document.getElementById('secondaryActions');
+        const showCommentsBtn = document.getElementById('showCommentsBtn');
+        if (secondaryActions) {
+          secondaryActions.style.display = 'none';
+        }
+        if (showCommentsBtn) {
+          showCommentsBtn.innerHTML = '📝 Show Comments';
+          showCommentsBtn.style.background = 'linear-gradient(45deg, #48bb78, #38a169)';
+          showCommentsBtn.disabled = true;
+          showCommentsBtn.style.opacity = '0.5';
+        }
+      }
+      
+      // Interactive video functions
+      function watchVideo() {
+        if (currentVideoDetails) {
+          const videoId = currentVideoDetails.id;
+          const url = `https://www.youtube.com/watch?v=${videoId}`;
+          window.open(url, '_blank');
+        } else {
+          showError('Video details not available');
+        }
+      }
+      
+      function showVideoStats() {
+        if (!currentVideoDetails) {
+          showError('Video details not available');
+          return;
+        }
+        
+        // Hide other panels
+        document.getElementById('trendingPanel').style.display = 'none';
+        document.getElementById('videoDetailsPanel').style.display = 'none';
+        
+        const stats = currentVideoDetails.statistics;
+        const snippet = currentVideoDetails.snippet;
+        
+        const statsHtml = `
+          <div class="video-stat">
+            <span class="stat-label">👁️ Views:</span>
+            <span class="stat-value">${formatNumber(stats.viewCount || 0)}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">👍 Likes:</span>
+            <span class="stat-value">${formatNumber(stats.likeCount || 0)}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">💬 Comments:</span>
+            <span class="stat-value">${formatNumber(stats.commentCount || 0)}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📅 Published:</span>
+            <span class="stat-value">${new Date(snippet.publishedAt).toLocaleDateString()}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">⏱️ Duration:</span>
+            <span class="stat-value">${snippet.duration || 'N/A'}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📺 Channel:</span>
+            <span class="stat-value">${snippet.channelTitle}</span>
+          </div>
+        `;
+        
+        document.getElementById('videoStatsContent').innerHTML = statsHtml;
+        document.getElementById('videoStatsPanel').style.display = 'block';
+        
+        // Scroll to the panel
+        document.getElementById('videoStatsPanel').scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      function showTrendingInfo() {
+        if (!currentVideoDetails) {
+          showError('Video details not available');
+          return;
+        }
+        
+        // Hide other panels
+        document.getElementById('videoStatsPanel').style.display = 'none';
+        document.getElementById('videoDetailsPanel').style.display = 'none';
+        
+        const stats = currentVideoDetails.statistics;
+        const snippet = currentVideoDetails.snippet;
+        
+        // Calculate engagement metrics
+        const views = parseInt(stats.viewCount || 0);
+        const likes = parseInt(stats.likeCount || 0);
+        const comments = parseInt(stats.commentCount || 0);
+        
+        const engagementRate = views > 0 ? ((likes + comments) / views * 100).toFixed(2) : 0;
+        const likesToViewsRatio = views > 0 ? (likes / views * 100).toFixed(2) : 0;
+        
+        // Determine trending status
+        let trendingStatus = 'Normal';
+        let trendingColor = '#718096';
+        
+        if (engagementRate > 5) {
+          trendingStatus = '🔥 Highly Engaging';
+          trendingColor = '#f56565';
+        } else if (engagementRate > 2) {
+          trendingStatus = '📈 Good Engagement';
+          trendingColor = '#ed8936';
+        } else if (engagementRate > 0.5) {
+          trendingStatus = '👍 Average Engagement';
+          trendingColor = '#48bb78';
+        }
+        
+        const trendingHtml = `
+          <div class="video-stat">
+            <span class="stat-label">🎯 Trending Status:</span>
+            <span class="stat-value" style="color: ${trendingColor};">${trendingStatus}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📊 Engagement Rate:</span>
+            <span class="stat-value">${engagementRate}%</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">❤️ Like Ratio:</span>
+            <span class="stat-value">${likesToViewsRatio}%</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">💬 Comments per 1K Views:</span>
+            <span class="stat-value">${views > 0 ? (comments / views * 1000).toFixed(1) : 0}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">🏷️ Category:</span>
+            <span class="stat-value">${getCategoryName(snippet.categoryId)}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">🔖 Tags Count:</span>
+            <span class="stat-value">${snippet.tags ? snippet.tags.length : 0} tags</span>
+          </div>
+        `;
+        
+        document.getElementById('trendingContent').innerHTML = trendingHtml;
+        document.getElementById('trendingPanel').style.display = 'block';
+        
+        // Scroll to the panel
+        document.getElementById('trendingPanel').scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      function showVideoDetails() {
+        if (!currentVideoDetails) {
+          showError('Video details not available');
+          return;
+        }
+        
+        // Hide other panels
+        document.getElementById('videoStatsPanel').style.display = 'none';
+        document.getElementById('trendingPanel').style.display = 'none';
+        
+        const snippet = currentVideoDetails.snippet;
+        const stats = currentVideoDetails.statistics;
+        const status = currentVideoDetails.status;
+        
+        const detailsHtml = `
+          <div class="video-stat">
+            <span class="stat-label">🎬 Title:</span>
+            <span class="stat-value" style="font-size: 14px; line-height: 1.4;">${snippet.title}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📝 Description:</span>
+            <span class="stat-value" style="font-size: 12px; line-height: 1.4; max-height: 100px; overflow-y: auto;">
+              ${snippet.description ? snippet.description.substring(0, 300) + (snippet.description.length > 300 ? '...' : '') : 'No description'}
+            </span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📺 Channel:</span>
+            <span class="stat-value">${snippet.channelTitle}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">🆔 Channel ID:</span>
+            <span class="stat-value" style="font-size: 12px;">${snippet.channelId}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">🌐 Language:</span>
+            <span class="stat-value">${snippet.defaultAudioLanguage || snippet.defaultLanguage || 'N/A'}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">🔒 Privacy:</span>
+            <span class="stat-value">${status.privacyStatus}</span>
+          </div>
+          <div class="video-stat">
+            <span class="stat-label">📱 Made for Kids:</span>
+            <span class="stat-value">${status.madeForKids ? 'Yes' : 'No'}</span>
+          </div>
+          ${snippet.tags ? `
+          <div class="video-stat">
+            <span class="stat-label">🏷️ Tags:</span>
+            <span class="stat-value" style="font-size: 12px; line-height: 1.4;">
+              ${snippet.tags.slice(0, 10).map(tag => `<span style="background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block;">${tag}</span>`).join('')}
+              ${snippet.tags.length > 10 ? `<span style="color: #718096;">...and ${snippet.tags.length - 10} more</span>` : ''}
+            </span>
+          </div>` : ''}
+        `;
+        
+        document.getElementById('videoDetailsContent').innerHTML = detailsHtml;
+        document.getElementById('videoDetailsPanel').style.display = 'block';
+        
+        // Scroll to the panel
+        document.getElementById('videoDetailsPanel').scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      // Helper functions
+      function formatNumber(num) {
+        if (num >= 1000000) {
+          return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+          return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
+      }
+      
+      function getCategoryName(categoryId) {
+        const categories = {
+          1: 'Film & Animation', 2: 'Autos & Vehicles', 10: 'Music', 15: 'Pets & Animals',
+          17: 'Sports', 19: 'Travel & Events', 20: 'Gaming', 22: 'People & Blogs',
+          23: 'Comedy', 24: 'Entertainment', 25: 'News & Politics', 26: 'Howto & Style',
+          27: 'Education', 28: 'Science & Technology', 29: 'Nonprofits & Activism'
+        };
+        return categories[categoryId] || `Category ${categoryId}`;
+      }
+      
+      // Enhanced AI analysis with video classification
+      function classifyVideo(videoDetails, sentimentResult) {
+        if (!videoDetails) return;
+        
+        const snippet = videoDetails.snippet;
+        const stats = videoDetails.statistics;
+        const views = parseInt(stats.viewCount || 0);
+        const likes = parseInt(stats.likeCount || 0);
+        const comments = parseInt(stats.commentCount || 0);
+        
+        const classifications = [];
+        
+        // Performance classification
+        if (views > 1000000) classifications.push('🌟 Viral Content');
+        else if (views > 100000) classifications.push('📈 Popular');
+        else if (views > 10000) classifications.push('👍 Good Performance');
+        else classifications.push('🌱 Growing');
+        
+        // Engagement classification
+        const engagementRate = views > 0 ? ((likes + comments) / views * 100) : 0;
+        if (engagementRate > 5) classifications.push('🔥 Highly Engaging');
+        else if (engagementRate > 2) classifications.push('💬 Interactive');
+        else classifications.push('👀 Passive Viewing');
+        
+        // Sentiment classification
+        if (sentimentResult.mood === 'Good') classifications.push('😊 Positive Reception');
+        else if (sentimentResult.mood === 'Bad') classifications.push('😔 Negative Reception');
+        else classifications.push('😐 Neutral Reception');
+        
+        // Content type classification
+        const title = snippet.title.toLowerCase();
+        if (title.includes('tutorial') || title.includes('how to')) classifications.push('📚 Educational');
+        if (title.includes('review')) classifications.push('⭐ Review Content');
+        if (title.includes('funny') || title.includes('comedy')) classifications.push('😂 Comedy');
+        if (title.includes('music') || title.includes('song')) classifications.push('🎵 Music');
+        if (title.includes('news')) classifications.push('📰 News');
+        
+        // Display classifications
+        const classificationHtml = classifications.map(classification => 
+          `<span class="classification-badge">${classification}</span>`
+        ).join('');
+        
+        document.getElementById('classificationContent').innerHTML = classificationHtml;
+        document.getElementById('videoClassification').style.display = 'block';
+      }
+      
+      // Analyze sentiment with Gemini AI - Enhanced for large datasets and better formatting
+      async function analyzeSentimentWithGemini(comments, apiKey) {
+        console.log(`Analyzing sentiment for ${comments.length} comments`);
+        
+        // For very large datasets, we might need to sample or chunk the comments
+        let commentsToAnalyze = comments;
+        let analysisNote = '';
+        
+        // If we have more than 1000 comments, use a smart sampling approach
+        if (comments.length > 1000) {
+          console.log(`Large dataset detected (${comments.length} comments). Using intelligent sampling...`);
+          
+          // Take a representative sample: 
+          // - First 200 comments (likely most relevant/popular)
+          // - Random 300 from the middle
+          // - Last 200 comments (most recent)
+          const firstBatch = comments.slice(0, 200);
+          const lastBatch = comments.slice(-200);
+          
+          // Random sample from middle
+          const middleComments = comments.slice(200, -200);
+          const randomMiddle = [];
+          for (let i = 0; i < Math.min(300, middleComments.length); i++) {
+            const randomIndex = Math.floor(Math.random() * middleComments.length);
+            randomMiddle.push(middleComments[randomIndex]);
+            middleComments.splice(randomIndex, 1);
+          }
+          
+          commentsToAnalyze = [...firstBatch, ...randomMiddle, ...lastBatch];
+          analysisNote = `\n\nNote: Analyzed a representative sample of ${commentsToAnalyze.length} comments from the total ${comments.length} comments for optimal AI processing.`;
+          
+          console.log(`Sampling complete: Analyzing ${commentsToAnalyze.length} representative comments`);
+        }
+        
+        // Enhanced prompt for better structured analysis
+        const videoTitle = currentVideoDetails ? currentVideoDetails.snippet.title : 'Unknown';
+        const videoCategory = currentVideoDetails ? getCategoryName(currentVideoDetails.snippet.categoryId) : 'Unknown';
+        
+        const prompt = `Analyze the sentiment of these YouTube comments for a video titled "${videoTitle}" in the ${videoCategory} category.
+
+Please provide a comprehensive analysis with the following structure:
+
+1. OVERALL SENTIMENT SUMMARY (3-4 sentences about general audience reception)
+
+2. OVERALL MOOD (choose exactly one): "Good", "Neutral", or "Bad"
+
+3. KEY THEMES (identify 3-5 main themes, format each as):
+THEME: [Theme Name]
+DESCRIPTION: [Brief description of this theme and its sentiment]
+
+4. SENTIMENT TRENDS (analysis of patterns in the comments)
+
+Total Comments Available: ${comments.length}
+Comments Analyzed: ${commentsToAnalyze.length}
+
+YouTube Comments:
+${commentsToAnalyze.map((comment, index) => `${index + 1}. "${comment}"`).join('\n')}
+
+Please follow the exact format above for consistent parsing.`;
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }]
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Failed to analyze sentiment');
+        }
+        
+        const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!aiResponse) {
+          throw new Error('No response from Gemini AI');
+        }
+        
+        const result = parseEnhancedGeminiResponse(aiResponse);
+        
+        // Add analysis note about sampling if applicable
+        if (analysisNote) {
+          result.summary += analysisNote;
+        }
+        
+        return result;
+      }
+      
+      // Enhanced parser for better structured AI response
+      function parseEnhancedGeminiResponse(response) {
+        let mood = 'Neutral';
+        let summary = '';
+        let themes = [];
+        let trends = '';
+        
+        // Extract mood
+        const lowerResponse = response.toLowerCase();
+        if (lowerResponse.includes('mood') || lowerResponse.includes('overall mood')) {
+          if (lowerResponse.includes('"good"') || lowerResponse.includes('good') && lowerResponse.includes('mood')) {
+            mood = 'Good';
+          } else if (lowerResponse.includes('"bad"') || lowerResponse.includes('bad') && lowerResponse.includes('mood')) {
+            mood = 'Bad';
+          }
+        } else {
+          // Fallback mood detection
+          if (lowerResponse.includes('positive') || lowerResponse.includes('great') || lowerResponse.includes('excellent')) {
+            mood = 'Good';
+          } else if (lowerResponse.includes('negative') || lowerResponse.includes('poor') || lowerResponse.includes('bad')) {
+            mood = 'Bad';
+          }
+        }
+        
+        // Split response into sections
+        const sections = response.split(/\d+\.\s*/);
+        
+        // Extract summary (usually first section after split)
+        if (sections.length > 1) {
+          summary = sections[1].split(/KEY THEMES|THEME:|SENTIMENT TRENDS/i)[0].trim();
+        } else {
+          summary = response.substring(0, 400) + '...';
+        }
+        
+        // Extract themes
+        const themeMatches = response.match(/THEME:\s*([^\n]+)\s*DESCRIPTION:\s*([^\n]+)/gi);
+        if (themeMatches) {
+          themes = themeMatches.map(match => {
+            const themeMatch = match.match(/THEME:\s*([^\n]+)\s*DESCRIPTION:\s*([^\n]+)/i);
+            if (themeMatch) {
+              return {
+                title: themeMatch[1].trim(),
+                description: themeMatch[2].trim()
+              };
+            }
+            return null;
+          }).filter(theme => theme !== null);
+        }
+        
+        // Extract sentiment trends
+        const trendsMatch = response.match(/SENTIMENT TRENDS[:\s]*([^]*)/i);
+        if (trendsMatch) {
+          trends = trendsMatch[1].trim();
+        }
+        
+        return {
+          summary: summary,
+          mood: mood,
+          themes: themes,
+          trends: trends,
+          fullResponse: response
+        };
+      }
+      
+      // ========================================
+      // COMMENT CATEGORIZATION FUNCTIONALITY
+      // ========================================
+      
+      // Categorize comments using Gemini AI - Optimized
+      async function categorizeCommentsWithAI(comments, geminiApiKey) {
+        if (!comments?.length) return { categories: {}, categorizedComments: [] };
+        
+        console.log(`Starting comment categorization for ${comments.length} comments...`);
+        
+        try {
+          // Sample for large datasets
+          const commentsToAnalyze = comments.length > 100 ? comments.slice(0, 100) : comments;
+          const commentTexts = commentsToAnalyze.map((c, i) => `${i + 1}. ${c}`).join('\n');
+
+          const prompt = `Categorize each YouTube comment below into one of these categories: Praise, Question, Complaint, Suggestion, or Spam.
+
+For each comment, determine:
+1. The main category (Praise/Question/Complaint/Suggestion/Spam)
+2. A brief reason for the categorization 
+3. Whether this influencer/commenter should be contacted again (Yes/No/Maybe)
+   - Yes: For positive, engaged users who provided valuable feedback
+   - No: For spammers, negative users, or non-constructive comments
+   - Maybe: For neutral comments that might become valuable with follow-up
+
+Comments to categorize:
+${commentTexts}
+
+Please respond in this exact JSON format:
+{
+  "categorized_comments": [
+    {
+      "comment_number": 1,
+      "text": "comment text here",
+      "category": "Praise",
+      "reason": "brief explanation",
+      "contact_again": "Yes/No/Maybe"
+    }
+  ],
+  "summary": {
+    "Praise": 15,
+    "Question": 8,
+    "Complaint": 3,
+    "Suggestion": 5,
+    "Spam": 2,
+    "ContactYes": 10,
+    "ContactNo": 15,
+    "ContactMaybe": 5
+  }
+}`;
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error?.message || 'Failed to categorize comments');
+          
+          const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!aiResponse) throw new Error('No response from Gemini AI for categorization');
+
+          // Parse JSON response
+          const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsedResult = JSON.parse(jsonMatch[0]);
+            console.log('✅ Comment categorization completed:', parsedResult.summary);
+            return {
+              categories: parsedResult.summary || {},
+              categorizedComments: parsedResult.categorized_comments || [],
+              totalAnalyzed: commentsToAnalyze.length,
+              totalComments: comments.length
+            };
+          }
+          
+          return createFallbackCategorization(commentsToAnalyze);
+        } catch (error) {
+          console.error('Error categorizing comments:', error);
+          return createFallbackCategorization(comments.slice(0, 20));
+        }
+      }
+      
+      // Fallback categorization using simple keyword matching - Optimized
+      function createFallbackCategorization(comments) {
+        const categories = { 
+          Praise: 0, Question: 0, Complaint: 0, Suggestion: 0, Spam: 0,
+          ContactYes: 0, ContactNo: 0, ContactMaybe: 0
+        };
+        const categorizedComments = [];
+        
+        // Define patterns for categorization
+        const patterns = [
+          { 
+            test: c => c.includes('?') || ['how', 'what', 'why'].some(w => c.includes(w)),
+            category: 'Question', 
+            reason: 'Contains question words or question mark',
+            contact: 'Maybe'
+          },
+          { 
+            test: c => ['great', 'awesome', 'love', 'amazing', 'good'].some(w => c.includes(w)),
+            category: 'Praise', 
+            reason: 'Contains positive words',
+            contact: 'Yes'
+          },
+          { 
+            test: c => ['bad', 'hate', 'terrible', 'awful', 'worst'].some(w => c.includes(w)),
+            category: 'Complaint', 
+            reason: 'Contains negative words',
+            contact: 'Maybe'
+          },
+          { 
+            test: c => ['should', 'could', 'suggest', 'recommend'].some(w => c.includes(w)),
+            category: 'Suggestion', 
+            reason: 'Contains suggestion words',
+            contact: 'Yes'
+          }
+        ];
+        
+        comments.forEach((comment, index) => {
+          const lowerComment = comment.toLowerCase();
+          let category = 'Spam';
+          let reason = 'Default categorization';
+          let contactAgain = 'No';
+          
+          // Find matching pattern
+          const match = patterns.find(p => p.test(lowerComment));
+          if (match) {
+            category = match.category;
+            reason = match.reason;
+            contactAgain = match.contact;
+          }
+          
+          categories[category]++;
+          categories[`Contact${contactAgain}`]++;
+          
+          categorizedComments.push({
+            comment_number: index + 1,
+            text: comment,
+            category,
+            reason,
+            contact_again: contactAgain
+          });
+        });
+        
+        return {
+          categories,
+          categorizedComments,
+          totalAnalyzed: comments.length,
+          totalComments: comments.length
+        };
+      }
+      
+      // Add categorization button and display function
+      function addCategorizationButton() {
+        const categorizeBtn = document.getElementById('categorizeBtn');
+        if (categorizeBtn && !categorizeBtn.onclick) {
+          categorizeBtn.onclick = categorizeCurrentComments;
+        }
+      }
+      
+      // Categorize current comments
+      async function categorizeCurrentComments() {
+        if (!window.allComments || window.allComments.length === 0) {
+          showError('No comments available to categorize. Please analyze a video first.');
+          return;
+        }
+        
+        const geminiApiKey = await getCrmVariable('tocheckthewidgetforcampaign__gemini_api_key');
+        if (!geminiApiKey) {
+          showError('Gemini API key not found in CRM variables');
+          return;
+        }
+        
+        showLoading(true);
+        document.getElementById('categorizeBtn').disabled = true;
+        
+        try {
+          console.log('=== CATEGORIZING COMMENTS ===');
+          
+          const categorization = await categorizeCommentsWithAI(window.allComments, geminiApiKey);
+          displayCommentCategories(categorization);
+          
+          showSuccess(`Comments categorized successfully! Analyzed ${categorization.totalAnalyzed} of ${categorization.totalComments} comments.`);
+          
+        } catch (error) {
+          console.error('Categorization error:', error);
+          showError('Failed to categorize comments: ' + error.message);
+        } finally {
+          showLoading(false);
+          document.getElementById('categorizeBtn').disabled = false;
+        }
+      }
+      
+      // Display comment categories in the UI
+      function displayCommentCategories(categorization) {
+        const { categories, categorizedComments, totalAnalyzed, totalComments } = categorization;
+        
+        // Create or update categories section
+        let categoriesSection = document.getElementById('categoriesSection');
+        if (!categoriesSection) {
+          categoriesSection = document.createElement('div');
+          categoriesSection.id = 'categoriesSection';
+          categoriesSection.className = 'themes-section';
+          categoriesSection.style.borderLeftColor = 'var(--info-color)';
+          
+          // Insert after sentiment summary
+          const sentimentSummary = document.getElementById('sentimentSummary');
+          if (sentimentSummary) {
+            sentimentSummary.parentNode.insertBefore(categoriesSection, sentimentSummary.nextSibling);
+          } else {
+            document.getElementById('result').appendChild(categoriesSection);
+          }
+        }
+        
+        // Filter main categories (not contact summaries)
+        const mainCategories = Object.entries(categories).filter(([key]) => 
+          !key.startsWith('Contact')
+        );
+        
+        const totalCategorized = mainCategories.reduce((sum, [_, count]) => sum + count, 0);
+        
+        // Get contact stats
+        const contactYes = categories.ContactYes || 0;
+        const contactNo = categories.ContactNo || 0;
+        const contactMaybe = categories.ContactMaybe || 0;
+        const totalContacts = contactYes + contactNo + contactMaybe;
+        
+        const categoriesHtml = `
+          <div class="themes-header" style="color: var(--info-color);">
+            <span style="margin-right: 10px;">🏷️</span> Comment Categories
+            <span style="font-size: 14px; margin-left: 10px; font-weight: 400; color: #718096;">
+              (${totalCategorized} of ${totalComments} comments)
+            </span>
+          </div>
+          
+          <div class="comment-categories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0;">
+            ${mainCategories.map(([category, count]) => {
+              const percentage = totalCategorized > 0 ? ((count / totalCategorized) * 100).toFixed(1) : 0;
+              const icon = getCategoryIcon(category);
+              const color = getCategoryColor(category);
+              
+              return `
+                <div class="category-card" style="border-left-color: ${color}; cursor: pointer;" onclick="showCategoryDetails('${category}')">
+                  <div class="category-icon" style="color: ${color};">${icon}</div>
+                  <div class="category-title">${category}</div>
+                  <div class="category-count" style="color: ${color};">${count}</div>
+                  <div class="category-percentage">${percentage}%</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          
+          <!-- Influencer Contact Stats -->
+          <div style="background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(240,240,250,0.9)); padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid rgba(0,0,0,0.05);">
+            <h4 style="color: var(--primary-color); margin-top: 0; font-size: 16px;">👥 Influencer Contact Strategy</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-around;">
+              <div style="text-align: center; padding: 10px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); flex: 1; min-width: 120px;">
+                <div style="font-size: 20px; font-weight: bold; color: #10b981;">📱 Contact</div>
+                <div style="font-size: 24px; font-weight: bold;">${contactYes}</div>
+                <div style="font-size: 14px; color: #718096;">${totalContacts ? ((contactYes/totalContacts)*100).toFixed(1) : 0}%</div>
+              </div>
+              <div style="text-align: center; padding: 10px; border-radius: 8px; background: rgba(245, 158, 11, 0.1); flex: 1; min-width: 120px;">
+                <div style="font-size: 20px; font-weight: bold; color: #f59e0b;">⏳ Maybe</div>
+                <div style="font-size: 24px; font-weight: bold;">${contactMaybe}</div>
+                <div style="font-size: 14px; color: #718096;">${totalContacts ? ((contactMaybe/totalContacts)*100).toFixed(1) : 0}%</div>
+              </div>
+              <div style="text-align: center; padding: 10px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); flex: 1; min-width: 120px;">
+                <div style="font-size: 20px; font-weight: bold; color: #ef4444;">⛔ Skip</div>
+                <div style="font-size: 24px; font-weight: bold;">${contactNo}</div>
+                <div style="font-size: 14px; color: #718096;">${totalContacts ? ((contactNo/totalContacts)*100).toFixed(1) : 0}%</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 15px;">
+            <button onclick="showAllCategorizedComments()" class="btn" style="background: linear-gradient(45deg, var(--info-color), var(--primary-color)); padding: 8px 16px; font-size: 14px;">
+              📋 View All Categorized Comments
+            </button>
+          </div>
+        `;
+        
+        categoriesSection.innerHTML = categoriesHtml;
+        categoriesSection.style.display = 'block';
+        
+        // Store categorization data globally
+        window.currentCategorization = categorization;
+      }
+      
+      // Show category details - Optimized
+      function showCategoryDetails(category) {
+        if (!window.currentCategorization) return;
+        
+        const categoryComments = window.currentCategorization.categorizedComments
+          .filter(comment => comment.category === category);
+        
+        if (!categoryComments.length) {
+          showError(`No comments found in ${category} category`);
+          return;
+        }
+        
+        const color = getCategoryColor(category);
+        const icon = getCategoryIcon(category);
+        
+        // Get top 10 comments with contact status
+        const detailsHtml = categoryComments.slice(0, 10).map((comment, index) => {
+          const contactAgain = comment.contact_again || 'Maybe';
+          return `
+          <div class="comment-item" style="border-left-color:${color}">
+            <div class="comment-header" style="color:${color};display:flex;justify-content:space-between">
+              <div>
+                ${icon} ${category} Comment ${index + 1}
+                <span style="font-size:12px;color:#718096;margin-left:10px">${comment.reason}</span>
+              </div>
+              <div style="background:${getContactColor(contactAgain)};color:white;padding:2px 8px;border-radius:12px;font-size:12px">
+                ${getContactIcon(contactAgain)} ${contactAgain}
+              </div>
+            </div>
+            <div class="comment-text">${comment.text}</div>
+          </div>
+          `;
+        }).join('');
+        
+        // Create and show modal
+        const existingModal = document.getElementById('categoryModal');
+        if (existingModal) existingModal.remove();
+        
+        const modal = document.createElement('div');
+        modal.id = 'categoryModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+        
+        modal.innerHTML = `
+          <div style="background:white;border-radius:15px;padding:30px;max-width:800px;max-height:80vh;overflow-y:auto;width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+              <h3 style="color:${color};margin:0;display:flex;align-items:center">
+                ${icon} ${category} Comments (${categoryComments.length})
+              </h3>
+              <button onclick="document.getElementById('categoryModal').remove()" 
+                      style="background:#f56565;color:white;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer">✕</button>
+            </div>
+            <div style="max-height:500px;overflow-y:auto">
+              ${detailsHtml}
+              ${categoryComments.length > 10 ? 
+                `<p style="text-align:center;color:#718096;margin-top:15px">
+                   Showing first 10 of ${categoryComments.length} ${category.toLowerCase()} comments
+                 </p>` : ''}
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+      }
+      
+      // Show all categorized comments - Optimized
+      function showAllCategorizedComments() {
+        if (!window.currentCategorization) return;
+        
+        const { categorizedComments } = window.currentCategorization;
+        
+        // Create and display the modal
+        const existingModal = document.getElementById('allCategoriesModal');
+        if (existingModal) existingModal.remove();
+        
+        const modal = document.createElement('div');
+        modal.id = 'allCategoriesModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+        
+        // Generate HTML for all comments
+        const allCommentsHtml = categorizedComments.map(comment => {
+          const color = getCategoryColor(comment.category);
+          const icon = getCategoryIcon(comment.category);
+          const contactAgain = comment.contact_again || 'Maybe';
+          const contactColor = getContactColor(contactAgain);
+          const contactIcon = getContactIcon(contactAgain);
+          
+          return `
+            <div class="comment-item" style="border-left-color:${color}">
+              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px">
+                <div class="comment-header" style="color:${color}">
+                  ${icon} ${comment.category} - Comment ${comment.comment_number}
+                  <span style="font-size:12px;color:#718096;margin-left:10px">${comment.reason}</span>
+                </div>
+                <div style="background:${contactColor};color:white;padding:3px 10px;border-radius:15px;font-size:13px;display:flex;align-items:center;gap:5px">
+                  ${contactIcon} ${contactAgain}
+                </div>
+              </div>
+              <div class="comment-text">${comment.text}</div>
+            </div>
+          `;
+        }).join('');
+        
+        modal.innerHTML = `
+          <div style="background:white;border-radius:15px;padding:30px;max-width:900px;max-height:80vh;overflow-y:auto;width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+              <h3 style="color:var(--primary-color);margin:0">
+                🏷️ All Categorized Comments (${categorizedComments.length})
+              </h3>
+              <button onclick="document.getElementById('allCategoriesModal').remove()" 
+                      style="background:#f56565;color:white;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer">✕</button>
+            </div>
+            <div style="max-height:600px;overflow-y:auto">${allCommentsHtml}</div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal on background click
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+      }
+      
+      // Helper functions for category styling
+      function getCategoryColor(category) {
+        const colors = {
+          'Praise': '#10b981',
+          'Question': '#3b82f6', 
+          'Complaint': '#ef4444',
+          'Suggestion': '#f59e0b',
+          'Spam': '#6b7280'
+        };
+        return colors[category] || '#718096';
+      }
+
+      function getCategoryIcon(category) {
+        const icons = {
+          'Praise': '👍',
+          'Question': '❓',
+          'Complaint': '⚠️', 
+          'Suggestion': '💡',
+          'Spam': '🚫'
+        };
+        return icons[category] || '📝';
+      }
+      
+      // Helper functions for contact information
+      function getContactColor(contact) {
+        return {
+          'Yes': '#10b981',  // Green
+          'Maybe': '#f59e0b', // Orange/Amber
+          'No': '#ef4444'    // Red
+        }[contact] || '#718096'; // Default gray
+      }
+      
+      function getContactIcon(contact) {
+        return {
+          'Yes': '📱',   // Phone/Contact
+          'Maybe': '⏳',  // Hourglass/Wait
+          'No': '⛔'     // No Entry/Skip
+        }[contact] || '❓'; // Default question mark
+      }
+      
+      // Auto-add categorization button when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        addCategorizationButton();
+        
+        // Initialize button states
+        const showCommentsBtn = document.getElementById('showCommentsBtn');
+        if (showCommentsBtn) {
+          showCommentsBtn.disabled = true;
+          showCommentsBtn.style.opacity = '0.5';
+        }
+      });
+      
+      // Also add button if DOM is already loaded
+      if (document.readyState !== 'loading') {
+        addCategorizationButton();
+        
+        // Initialize button states
+        const showCommentsBtn = document.getElementById('showCommentsBtn');
+        if (showCommentsBtn) {
+          showCommentsBtn.disabled = true;
+          showCommentsBtn.style.opacity = '0.5';
+        }
+      }
+    </script>
+  </body>
+</html>

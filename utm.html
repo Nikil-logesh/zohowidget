@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTM Link Generator - Partner Referrals</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .readonly {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .url-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .status-message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 UTM Link Generator</h1>
+            <p>Create trackable links for partner referrals</p>
+        </div>
+        
+        <div class="loading" id="loadingDiv">
+            <div class="spinner"></div>
+            Loading partner information...
+        </div>
+        
+        <div id="mainForm" class="hidden">
+            <div class="form-group">
+                <label for="baseUrl">Base Form URL *</label>
+                <textarea 
+                    id="baseUrl" 
+                    placeholder="Paste your Zoho Form URL here..."
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="partnerName">Partner Name (UTM Source)</label>
+                <input 
+                    type="text" 
+                    id="partnerName" 
+                    placeholder="Enter partner name or wait for auto-load..."
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="medium">Medium (UTM Medium) *</label>
+                <select id="medium" required>
+                    <option value="">Select medium...</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="email">Email</option>
+                    <option value="website">Website</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="referral">Referral</option>
+                    <option value="print">Print</option>
+                    <option value="event">Event</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="campaign">Campaign Name (UTM Campaign) *</label>
+                <input 
+                    type="text" 
+                    id="campaign" 
+                    placeholder="e.g., modular_kitchen_july, summer_promotion"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Content Type (UTM Content) *</label>
+                <select id="content" required>
+                    <option value="">Select content type...</option>
+                    <option value="post">Post</option>
+                    <option value="story">Story</option>
+                    <option value="video">Video</option>
+                    <option value="image">Image</option>
+                    <option value="carousel">Carousel</option>
+                    <option value="reel">Reel</option>
+                    <option value="link">Link</option>
+                    <option value="bio">Bio</option>
+                    <option value="ad">Advertisement</option>
+                    <option value="banner">Banner</option>
+                    <option value="flyer">Flyer</option>
+                    <option value="brochure">Brochure</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn" id="generateBtn">
+                    🔗 Generate UTM Link
+                </button>
+                <button type="button" class="btn btn-secondary" id="clearBtn">
+                    🔄 Clear Form
+                </button>
+            </div>
+        </div>
+        
+        <div id="statusMessage"></div>
+        
+        <div id="resultSection" class="result-section hidden">
+            <h3>📋 Generated UTM Link</h3>
+            <div id="urlDisplay" class="url-display"></div>
+            <div class="button-group">
+                <button type="button" class="btn" id="copyBtn">
+                    📋 Copy Link
+                </button>
+                <button type="button" class="btn btn-secondary" id="testBtn">
+                    🔍 Test Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+    
+    <script>
+    // Wait for SDK to load
+    window.addEventListener('load', function() {
+        console.log('Window loaded, starting initialization...');
+        
+        // Global variables
+        var ZOHO_APP_INITIALIZED = false;
+        var generatedLink = '';
+        var widgetContext = null;
+        var partnerName = '';
+        
+        // Initialize the widget
+        function initWidget() {
+            console.log('Initializing widget...');
+            
+            // Check if ZOHO is available
+            if (typeof ZOHO === 'undefined' && typeof ZohoEmbeddedAppSDK !== 'undefined') {
+                window.ZOHO = window.ZohoEmbeddedAppSDK;
+                console.log('Using ZohoEmbeddedAppSDK as ZOHO');
+            }
+            
+            if (typeof ZOHO === 'undefined') {
+                console.error('ZOHO SDK not found');
+                showManualMode();
+                return;
+            }
+            
+            console.log('ZOHO SDK found, initializing...');
+            
+            // Initialize the embedded app
+            ZOHO.embeddedApp.on("PageLoad", function(data) {
+                console.log("PageLoad event received:", data);
+                widgetContext = data;
+                
+                // Extract partner name from the context
+                if (data && data.EntityId) {
+                    var entityName = data.Entity || 'tocheckthewidgetforcampaign_Partners';
+                    console.log('Fetching record from:', entityName, 'ID:', data.EntityId);
+                    
+                    // Use setTimeout to ensure SDK is fully ready
+                    setTimeout(function() {
+                        ZOHO.CRM.API.getRecord({
+                            Entity: entityName,
+                            RecordID: data.EntityId
+                        }).then(function(response) {
+                            console.log('Record fetched:', response);
+                            if (response && response.data && response.data[0]) {
+                                var record = response.data[0];
+                                partnerName = record.Name || '';
+                                if (partnerName) {
+                                    document.getElementById('partnerName').value = partnerName;
+                                    console.log('Partner name set to:', partnerName);
+                                }
+                            }
+                            showForm();
+                        }).catch(function(error) {
+                            console.error('Error fetching record:', error);
+                            showForm();
+                        });
+                    }, 500);
+                } else {
+                    console.log('No entity context found');
+                    showForm();
+                }
+            });
+            
+            ZOHO.embeddedApp.init().then(function() {
+                ZOHO_APP_INITIALIZED = true;
+                console.log('ZOHO embedded app initialized successfully');
+                // Don't show form here, wait for PageLoad event
+            }).catch(function(error) {
+                console.error('Failed to initialize embedded app:', error);
+                showManualMode();
+            });
+        }
+        
+        // Show manual mode
+        function showManualMode() {
+            console.log('Entering manual mode');
+            document.getElementById('loadingDiv').classList.add('hidden');
+            document.getElementById('mainForm').classList.remove('hidden');
+            showStatus('Running in manual mode. Please enter partner name manually.', 'info');
+        }
+        
+        // Show form
+        function showForm() {
+            console.log('Showing form');
+            document.getElementById('loadingDiv').classList.add('hidden');
+            document.getElementById('mainForm').classList.remove('hidden');
+            showStatus('Ready! You can now generate UTM links.', 'success');
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            var statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message ' + (type || 'info');
+            statusDiv.textContent = message;
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(function() {
+                    statusDiv.style.opacity = '0';
+                    setTimeout(function() {
+                        statusDiv.textContent = '';
+                        statusDiv.style.opacity = '1';
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // Generate UTM Link
+        function generateUTMLink() {
+            var baseUrl = document.getElementById('baseUrl').value.trim();
+            var partnerNameValue = document.getElementById('partnerName').value.trim();
+            var medium = document.getElementById('medium').value;
+            var campaign = document.getElementById('campaign').value.trim();
+            var content = document.getElementById('content').value;
+            
+            if (!baseUrl || !medium || !campaign || !content) {
+                showStatus('Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            try {
+                var url = new URL(baseUrl);
+                
+                if (partnerNameValue) {
+                    url.searchParams.set('utm_source', partnerNameValue);
+                }
+                url.searchParams.set('utm_medium', medium);
+                url.searchParams.set('utm_campaign', campaign);
+                url.searchParams.set('utm_content', content);
+                
+                generatedLink = url.toString();
+                
+                document.getElementById('urlDisplay').textContent = generatedLink;
+                document.getElementById('resultSection').classList.remove('hidden');
+                
+                showStatus('✅ UTM link generated successfully!', 'success');
+            } catch (error) {
+                showStatus('Invalid URL. Please check your base URL.', 'error');
+            }
+        }
+        
+        // Clear Form
+        function clearForm() {
+            document.getElementById('baseUrl').value = '';
+            document.getElementById('medium').value = '';
+            document.getElementById('campaign').value = '';
+            document.getElementById('content').value = '';
+            document.getElementById('resultSection').classList.add('hidden');
+            generatedLink = '';
+            showStatus('Form cleared.', 'info');
+        }
+        
+        // Copy to Clipboard
+        function copyToClipboard() {
+            if (!generatedLink) return;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(generatedLink).then(function() {
+                    showStatus('✅ Link copied to clipboard!', 'success');
+                }).catch(function() {
+                    fallbackCopy();
+                });
+            } else {
+                fallbackCopy();
+            }
+            
+            function fallbackCopy() {
+                var textarea = document.createElement('textarea');
+                textarea.value = generatedLink;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showStatus('✅ Link copied to clipboard!', 'success');
+            }
+        }
+        
+        // Test Link
+        function testLink() {
+            if (generatedLink) {
+                window.open(generatedLink, '_blank');
+            }
+        }
+        
+        // Attach event listeners
+        document.getElementById('generateBtn').addEventListener('click', generateUTMLink);
+        document.getElementById('clearBtn').addEventListener('click', clearForm);
+        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+        document.getElementById('testBtn').addEventListener('click', testLink);
+        
+        // Start initialization with a small delay to ensure SDK is loaded
+        setTimeout(initWidget, 100);
+    });
+    </script>
+</body>
+</html>

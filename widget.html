@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Intelligence AI Widget</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.zohostatic.com/crm/javascript/zcrmjssdk.js"></script>
+    <script src="https://live.zwidgets.com/js-sdk/1.0/ZohoEmbededAppSDK.min.js"></script>
+    <script src="https://js.zohostatic.com/crm/sdk/v3/ZohoEmbededAppSDK.min.js"></script>
+    <script src="https://live.zwidgets.com/js-sdk/1.4/ZohoEmbededAppSDK.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Campaign Intelligence Assistant</h1>
+            <p>AI-powered campaign analysis and recommendations</p>
+        </div>
+
+        <div class="action-buttons">
+            <button id="fetchDataBtn" class="btn btn-primary">
+                <span class="btn-icon">📊</span>
+                Fetch Campaign Data
+            </button>
+            <button id="generateAIBtn" class="btn btn-secondary" disabled>
+                <span class="btn-icon">🤖</span>
+                Generate AI Insights
+            </button>
+        </div>
+
+        <div class="status-section">
+            <div id="statusMessage" class="status-message"></div>
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <span>Processing AI insights...</span>
+            </div>
+        </div>
+
+        <div class="data-section" id="dataSection" style="display: none;">
+            <h2>📈 Company Intelligence Overview</h2>
+            
+            <!-- Company Profile Card -->
+            <div class="company-profile-card">
+                <div class="company-header">
+                    <h3 id="companyName">-</h3>
+                    <div class="company-badges">
+                        <span class="badge business-category" id="generalBusinessCategory">-</span>
+                        <span class="badge industry-category" id="industryCategory">-</span>
+                        <span class="badge market-orientation" id="marketOrientation">-</span>
+                    </div>
+                </div>
+                
+                <!-- Financial Overview -->
+                <div class="financial-overview">
+                    <h4>💰 Financial Performance</h4>
+                    <div class="financial-grid">
+                        <div class="financial-item revenue">
+                            <div class="financial-label">Revenue (Q)</div>
+                            <div class="financial-value" id="revenue">-</div>
+                        </div>
+                        <div class="financial-item profit">
+                            <div class="financial-label">Profit</div>
+                            <div class="financial-value" id="profit">-</div>
+                        </div>
+                        <div class="financial-item loss">
+                            <div class="financial-label">Loss</div>
+                            <div class="financial-value" id="loss">-</div>
+                        </div>
+                        <div class="financial-item net">
+                            <div class="financial-label">Net P/L</div>
+                            <div class="financial-value" id="netProfitLoss">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Campaign History -->
+                <div class="campaign-history">
+                    <h4>📊 Previous Campaign</h4>
+                    <div class="campaign-details">
+                        <div class="campaign-item">
+                            <span class="campaign-label">Type:</span>
+                            <span id="previousCampaignType">-</span>
+                        </div>
+                        <div class="campaign-item">
+                            <span class="campaign-label">ROI:</span>
+                            <span class="roi-highlight" id="previousCampaignROI">-</span>
+                        </div>
+                        <div class="campaign-item">
+                            <span class="campaign-label">Target:</span>
+                            <span id="targetAudience">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sales Insights -->
+                <div class="sales-insights">
+                    <h4>📈 Sales Intelligence</h4>
+                    <div id="salesReportSummary" class="insights-text">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Gauges Section -->
+        <div class="performance-section" id="performanceSection" style="display: none;">
+            <h2>📊 Performance Dashboard</h2>
+            <div class="gauges-grid">
+                <div class="gauge-card">
+                    <h4>Campaign Health Score</h4>
+                    <div class="gauge-container">
+                        <canvas id="healthGauge" width="120" height="120"></canvas>
+                        <div class="gauge-value" id="healthValue">0%</div>
+                    </div>
+                </div>
+                <div class="gauge-card">
+                    <h4>ROI Performance</h4>
+                    <div class="gauge-container">
+                        <canvas id="roiGauge" width="120" height="120"></canvas>
+                        <div class="gauge-value" id="roiValue">0%</div>
+                    </div>
+                </div>
+                <div class="gauge-card">
+                    <h4>Success Probability</h4>
+                    <div class="gauge-container">
+                        <canvas id="successGauge" width="120" height="120"></canvas>
+                        <div class="gauge-value" id="successValue">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-results-section" id="aiResultsSection" style="display: none;">
+            <h2>🤖 AI-Generated Campaign Insights</h2>
+            
+            <!-- AI Confidence Indicators -->
+            <div class="confidence-overview">
+                <div class="confidence-card">
+                    <div class="confidence-header">
+                        <span class="confidence-label">Overall Confidence</span>
+                        <span class="confidence-score" id="overallConfidence">0%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="overallConfidenceFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multiple AI Scenarios -->
+            <div class="scenarios-section">
+                <h3>🎯 Strategic Scenarios</h3>
+                <div class="scenario-tabs">
+                    <button class="scenario-tab active" data-scenario="conservative">
+                        <div class="scenario-icon">🛡️</div>
+                        <div class="scenario-info">
+                            <div class="scenario-name">Conservative</div>
+                            <div class="scenario-risk">Low Risk</div>
+                        </div>
+                    </button>
+                    <button class="scenario-tab" data-scenario="moderate">
+                        <div class="scenario-icon">⚖️</div>
+                        <div class="scenario-info">
+                            <div class="scenario-name">Moderate</div>
+                            <div class="scenario-risk">Medium Risk</div>
+                        </div>
+                    </button>
+                    <button class="scenario-tab" data-scenario="aggressive">
+                        <div class="scenario-icon">🚀</div>
+                        <div class="scenario-info">
+                            <div class="scenario-name">Aggressive</div>
+                            <div class="scenario-risk">High Risk</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="scenario-content" id="scenarioContent">
+                    <div class="scenario-details active" id="conservative">
+                        <div class="risk-reward-card">
+                            <div class="risk-section">
+                                <h4>🛡️ Risk Assessment</h4>
+                                <div class="risk-meter">
+                                    <div class="risk-bar low"></div>
+                                    <span>Low Risk (15%)</span>
+                                </div>
+                            </div>
+                            <div class="reward-section">
+                                <h4>💰 Expected ROI</h4>
+                                <div class="roi-projection">12-18%</div>
+                            </div>
+                        </div>
+                        <div class="budget-allocation">
+                            <h4>💼 Budget Allocation</h4>
+                            <div class="allocation-chart">
+                                <canvas id="conservativeBudget" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-details" id="moderate">
+                        <div class="risk-reward-card">
+                            <div class="risk-section">
+                                <h4>⚖️ Risk Assessment</h4>
+                                <div class="risk-meter">
+                                    <div class="risk-bar medium"></div>
+                                    <span>Medium Risk (35%)</span>
+                                </div>
+                            </div>
+                            <div class="reward-section">
+                                <h4>💰 Expected ROI</h4>
+                                <div class="roi-projection">20-28%</div>
+                            </div>
+                        </div>
+                        <div class="budget-allocation">
+                            <h4>💼 Budget Allocation</h4>
+                            <div class="allocation-chart">
+                                <canvas id="moderateBudget" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-details" id="aggressive">
+                        <div class="risk-reward-card">
+                            <div class="risk-section">
+                                <h4>🚀 Risk Assessment</h4>
+                                <div class="risk-meter">
+                                    <div class="risk-bar high"></div>
+                                    <span>High Risk (60%)</span>
+                                </div>
+                            </div>
+                            <div class="reward-section">
+                                <h4>💰 Expected ROI</h4>
+                                <div class="roi-projection">35-50%</div>
+                            </div>
+                        </div>
+                        <div class="budget-allocation">
+                            <h4>💼 Budget Allocation</h4>
+                            <div class="allocation-chart">
+                                <canvas id="aggressiveBudget" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-section">
+                <div class="ai-header">
+                    <h3>📘 New Campaign Strategy</h3>
+                    <div class="confidence-indicator">
+                        <span class="confidence-label">Confidence:</span>
+                        <span class="confidence-score" id="strategyConfidence">0%</span>
+                        <div class="confidence-mini-bar">
+                            <div class="confidence-mini-fill" id="strategyConfidenceFill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="campaignStrategy" class="ai-content"></div>
+            </div>
+
+            <div class="ai-section">
+                <div class="ai-header">
+                    <h3>📝 Suggested Content Ideas</h3>
+                    <div class="confidence-indicator">
+                        <span class="confidence-label">Confidence:</span>
+                        <span class="confidence-score" id="contentConfidence">0%</span>
+                        <div class="confidence-mini-bar">
+                            <div class="confidence-mini-fill" id="contentConfidenceFill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="suggestedContent" class="ai-content"></div>
+            </div>
+
+            <!-- Competitor Intelligence Dashboard -->
+            <div class="competitor-analysis-section">
+                <h3>🎯 Competitive Intelligence Dashboard</h3>
+                <div class="competitor-grid">
+                    <div class="competitor-card global">
+                        <div class="competitor-header">
+                            <h4>🌍 Global Leaders</h4>
+                            <span class="success-rate" id="globalSuccessRate">85%</span>
+                        </div>
+                        <div class="campaign-example">
+                            <h5 id="globalCampaignTitle">Leading Campaign Strategy</h5>
+                            <div class="campaign-stats">
+                                <span class="stat-item" id="globalROI">ROI: 167%</span>
+                                <span class="stat-item" id="globalBudget">Budget: $2M+</span>
+                                <span class="stat-item" id="globalReach">Reach: 50M+</span>
+                            </div>
+                            <p class="campaign-strategy" id="globalStrategy">
+                                Global leaders leverage data-driven personalization and omnichannel experiences...
+                            </p>
+                        </div>
+                        <div id="globalCompetitors" class="competitor-list">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="competitor-card local">
+                        <div class="competitor-header">
+                            <h4>🇮🇳 Local Champions</h4>
+                            <span class="success-rate" id="localSuccessRate">78%</span>
+                        </div>
+                        <div class="campaign-example">
+                            <h5 id="localCampaignTitle">Regional Market Strategy</h5>
+                            <div class="campaign-stats">
+                                <span class="stat-item" id="localROI">ROI: 134%</span>
+                                <span class="stat-item" id="localBudget">Budget: ₹50L+</span>
+                                <span class="stat-item" id="localReach">Reach: 10M+</span>
+                            </div>
+                            <p class="campaign-strategy" id="localStrategy">
+                                Local leaders focus on cultural relevance and regional language targeting...
+                            </p>
+                        </div>
+                        <div id="localCompetitors" class="competitor-list">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced ROI Analysis with Competitor Insights -->
+            <div class="chart-section">
+                <h3>📊 Interactive ROI Analysis & Competitor Benchmarks</h3>
+                <div class="chart-container interactive enhanced">
+                    <div class="chart-controls-wrapper">
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-chart="comparison">ROI Comparison</button>
+                            <button class="chart-btn" data-chart="projection">Growth Projection</button>
+                            <button class="chart-btn" data-chart="breakdown">Budget Breakdown</button>
+                            <button class="chart-btn" data-chart="competitor">Competitor Analysis</button>
+                        </div>
+                        <div class="chart-info">
+                            <span class="chart-legend">
+                                <span class="legend-item yours">Your Campaign</span>
+                                <span class="legend-item competitor-global">Global Leaders</span>
+                                <span class="legend-item competitor-local">Local Competitors</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="roiChart"></canvas>
+                        <div class="chart-tooltip" id="chartTooltip"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competitor Campaign Analysis -->
+            <div class="competitor-analysis-section">
+                <h3>🏆 Competitor Campaign Intelligence</h3>
+                <div class="competitor-grid">
+                    <div class="competitor-card global">
+                        <div class="competitor-header">
+                            <h4>🌍 Global Market Leaders</h4>
+                            <div class="success-rate">Success Rate: 82%</div>
+                        </div>
+                        <div class="competitor-campaigns">
+                            <div class="campaign-example">
+                                <h5>📱 Nike's "Just Do It" Digital Campaign</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 156%</span>
+                                    <span class="stat-item">Reach: 2.3B</span>
+                                    <span class="stat-item">Engagement: 12.4%</span>
+                                    <span class="stat-item">Budget: $40M</span>
+                                </div>
+                                <p class="campaign-strategy">Multi-platform approach with personalized content, influencer partnerships, and real-time social listening. Leveraged user-generated content, AR try-on experiences, and geolocation-based targeting across 15+ markets.</p>
+                            </div>
+                            <div class="campaign-example">
+                                <h5>🎯 Coca-Cola's "Share a Coke" Campaign</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 267%</span>
+                                    <span class="stat-item">Sales: +2.5%</span>
+                                    <span class="stat-item">Social: 500K posts</span>
+                                    <span class="stat-item">Countries: 80+</span>
+                                </div>
+                                <p class="campaign-strategy">Personalization at scale with 250+ names, print-to-digital integration, social media amplification using #ShareACoke, retail activation with custom vending machines, and local celebrity endorsements.</p>
+                            </div>
+                            <div class="campaign-example">
+                                <h5>🚗 BMW's "The Ultimate Driving Machine" Revival</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 189%</span>
+                                    <span class="stat-item">Test Drives: +67%</span>
+                                    <span class="stat-item">Brand Recall: +45%</span>
+                                    <span class="stat-item">Digital Views: 1.2B</span>
+                                </div>
+                                <p class="campaign-strategy">Immersive digital experience with VR test drives, AI-powered customization tools, targeted premium segment advertising, and experiential marketing events in major cities.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="competitor-card local">
+                        <div class="competitor-header">
+                            <h4>🏠 Local Market Competitors</h4>
+                            <div class="success-rate">Success Rate: 68%</div>
+                        </div>
+                        <div class="competitor-campaigns">
+                            <div class="campaign-example">
+                                <h5>🛍️ BigBazaar's "Sabse Saste Din" Campaign</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 134%</span>
+                                    <span class="stat-item">Footfall: +45%</span>
+                                    <span class="stat-item">Sales: +67%</span>
+                                    <span class="stat-item">Cities: 200+</span>
+                                </div>
+                                <p class="campaign-strategy">Festival-timing strategy during Diwali, local language content in 8 regional languages, TV + digital integration, flash sales with countdown timers, and family-focused messaging with regional celebrations.</p>
+                            </div>
+                            <div class="campaign-example">
+                                <h5>📺 Zomato's Regional Food Festival Campaign</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 178%</span>
+                                    <span class="stat-item">Orders: +89%</span>
+                                    <span class="stat-item">Downloads: +156%</span>
+                                    <span class="stat-item">Partners: 50K+</span>
+                                </div>
+                                <p class="campaign-strategy">Hyperlocal targeting with city-specific food preferences, regional taste preference analysis, food blogger partnerships, geo-targeted push notifications, and cultural event tie-ins across 25 cities.</p>
+                            </div>
+                            <div class="campaign-example">
+                                <h5>💼 Flipkart's "Big Billion Days" Strategy</h5>
+                                <div class="campaign-stats">
+                                    <span class="stat-item">ROI: 245%</span>
+                                    <span class="stat-item">GMV: $4.2B</span>
+                                    <span class="stat-item">Users: 45M+</span>
+                                    <span class="stat-item">Orders: 50M+</span>
+                                </div>
+                                <p class="campaign-strategy">Pre-buzz building with early access for Plus members, tier-based pricing with flash sales, celebrity endorsements, supply chain optimization for faster delivery, and gamification with spin wheels and rewards.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Market Intelligence Summary -->
+                <div class="market-intelligence-summary">
+                    <h4>📈 Key Market Intelligence Insights</h4>
+                    <div class="intelligence-grid">
+                        <div class="intelligence-card">
+                            <div class="intelligence-icon">🎯</div>
+                            <h5>Targeting Trends</h5>
+                            <p>67% of successful campaigns use AI-powered audience segmentation combined with real-time behavior tracking</p>
+                        </div>
+                        <div class="intelligence-card">
+                            <div class="intelligence-icon">📱</div>
+                            <h5>Channel Mix</h5>
+                            <p>Top performers allocate 45% to digital, 30% to social media, 15% to traditional, and 10% to experiential marketing</p>
+                        </div>
+                        <div class="intelligence-card">
+                            <div class="intelligence-icon">⏱️</div>
+                            <h5>Timing Strategy</h5>
+                            <p>Peak engagement occurs during 7-9 PM IST, with 34% higher conversion rates during festival seasons</p>
+                        </div>
+                        <div class="intelligence-card">
+                            <div class="intelligence-icon">💰</div>
+                            <h5>Budget Allocation</h5>
+                            <p>High-ROI campaigns spend 40% on content creation, 35% on media buy, 15% on influencers, 10% on optimization</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategic Campaign Recommendations -->
+            <div class="campaign-recommendations-section">
+                <h3>💡 Data-Driven Campaign Strategy Recommendations</h3>
+                <div class="recommendations-grid">
+                    <div class="recommendation-category">
+                        <h4>🎯 Advanced Targeting & Segmentation</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> Companies using AI-powered segmentation see 4.2x higher conversion rates and 73% better customer lifetime value
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>Behavioral Segmentation:</strong> Target based on purchase history, website dwell time, email engagement patterns, and app usage frequency (increases conversion by 67%)</li>
+                                <li><strong>Psychographic Profiling:</strong> Segment by lifestyle, values, interests using social media sentiment analysis and purchase behavior (improves targeting accuracy by 89%)</li>
+                                <li><strong>Lookalike Modeling:</strong> Use ML algorithms to find similar customers to your top 20% revenue generators across 15+ data points</li>
+                                <li><strong>Real-time Personalization:</strong> Dynamic content adaptation based on current session behavior, weather, time of day, and device type</li>
+                                <li><strong>Predictive Segmentation:</strong> Identify customers likely to churn, upgrade, or become advocates using predictive analytics</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-category">
+                        <h4>📱 Omnichannel Strategy & Optimization</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> Omnichannel campaigns generate 4.1x more revenue and have 89% higher customer retention than single-channel approaches
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>Social Commerce Integration:</strong> Instagram Shopping, Facebook Marketplace, Pinterest Shopping with shoppable posts (avg. ROI: 187%)</li>
+                                <li><strong>Video-First Strategy:</strong> YouTube Shorts, Instagram Reels, TikTok for 156% higher engagement rates among 18-35 demographics</li>
+                                <li><strong>Advanced Email Automation:</strong> Behavioral triggers, predictive send times, AI-powered subject line optimization (improves open rates by 45%)</li>
+                                <li><strong>Micro-Influencer Networks:</strong> Partner with 50-100 micro-influencers (1K-100K followers) for 7.2x higher engagement than macro-influencers</li>
+                                <li><strong>Progressive Web Apps:</strong> Mobile-first experience with offline capabilities and push notifications (increases mobile conversion by 67%)</li>
+                                <li><strong>Voice Search Optimization:</strong> Optimize for voice queries as 32% of consumers use voice search for product discovery</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-category">
+                        <h4>📊 Content & Creative Excellence</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> User-generated content campaigns see 6.9x higher engagement and 4.5x better CTR than brand-created content
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>Interactive Content Hub:</strong> Polls, quizzes, AR filters, and calculators increase engagement by 134% and time-on-site by 89%</li>
+                                <li><strong>Emotional Storytelling:</strong> Narrative-driven campaigns improve brand recall by 22x and purchase intent by 67%</li>
+                                <li><strong>Live Streaming Strategy:</strong> Real-time product demos, Q&As, and behind-the-scenes content drive 15x more comments</li>
+                                <li><strong>Seasonal & Cultural Relevance:</strong> Time campaigns with local festivals, events, and trends for 47% better performance</li>
+                                <li><strong>AI-Generated Personalization:</strong> Dynamic creative optimization with personalized product recommendations and messaging</li>
+                                <li><strong>Community Building:</strong> Create brand communities and customer advocacy programs for 3.2x higher lifetime value</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-category">
+                        <h4>🔄 Advanced Analytics & Optimization</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> Advanced A/B testing and optimization increase conversion rates by an average of 67% and reduce customer acquisition costs by 34%
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>Multivariate Testing:</strong> Test headlines, images, CTAs, and layouts simultaneously across 8+ variables for optimal combinations</li>
+                                <li><strong>AI-Powered Budget Allocation:</strong> Dynamic budget shifting to high-performing segments and channels in real-time</li>
+                                <li><strong>Multi-Touch Attribution:</strong> Track customer journey across all touchpoints for accurate ROI measurement and optimization</li>
+                                <li><strong>Predictive Analytics:</strong> Forecast campaign performance, customer lifetime value, and optimal timing using ML models</li>
+                                <li><strong>Sentiment Analysis:</strong> Monitor brand mentions and sentiment across social platforms for real-time campaign adjustments</li>
+                                <li><strong>Cohort Analysis:</strong> Track user behavior patterns and retention rates to optimize long-term campaign strategy</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-category">
+                        <h4>💰 Budget & Resource Optimization</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> Strategic budget allocation based on performance data improves ROI by 89% compared to equal distribution
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>Performance-Based Allocation:</strong> 40% content creation, 30% paid media, 20% influencer partnerships, 10% optimization tools</li>
+                                <li><strong>Programmatic Advertising:</strong> Automated bidding and placement optimization for 45% better cost-per-acquisition</li>
+                                <li><strong>Cross-Channel Synergies:</strong> Coordinate messaging across channels for 3.4x better brand recall and 67% lower acquisition costs</li>
+                                <li><strong>Seasonal Budget Planning:</strong> Allocate 35% of annual budget during peak seasons (festivals, holidays) for maximum impact</li>
+                                <li><strong>Technology Investment:</strong> Marketing automation, CRM integration, and analytics tools typically return $5.20 for every $1 invested</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-category">
+                        <h4>🚀 Innovation & Future-Proofing</h4>
+                        <div class="recommendation-content">
+                            <div class="research-insight">
+                                <strong>Research Finding:</strong> Early adopters of emerging technologies see 2.3x better performance and 67% higher market share growth
+                            </div>
+                            <ul class="recommendation-list">
+                                <li><strong>AI & Machine Learning:</strong> Implement chatbots, recommendation engines, and predictive modeling for personalized experiences</li>
+                                <li><strong>Augmented Reality:</strong> AR try-ons and virtual product demonstrations increase purchase confidence by 78%</li>
+                                <li><strong>Blockchain & NFTs:</strong> Explore loyalty programs and digital collectibles for community building and engagement</li>
+                                <li><strong>Voice Commerce:</strong> Optimize for voice shopping as adoption grows 67% year-over-year</li>
+                                <li><strong>Sustainability Focus:</strong> Highlight eco-friendly practices as 73% of consumers prefer sustainable brands</li>
+                                <li><strong>Web3 Integration:</strong> Explore decentralized marketing approaches and community-owned brand experiences</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Timeline -->
+            <div class="implementation-timeline-section">
+                <h3>🚀 Strategic Implementation Timeline</h3>
+                <div class="timeline-container">
+                    <div class="timeline-phase">
+                        <div class="phase-number">1</div>
+                        <div class="phase-content">
+                            <h5>Weeks 1-2: Research & Foundation</h5>
+                            <div class="phase-budget">Budget: 15% of total</div>
+                            <ul>
+                                <li><strong>Competitive Intelligence:</strong> Deep-dive analysis of top 10 competitors' strategies, messaging, and performance metrics</li>
+                                <li><strong>Audience Research:</strong> Customer interviews, surveys, and social listening to understand pain points and motivations</li>
+                                <li><strong>Persona Development:</strong> Create detailed buyer personas with behavioral triggers and preferred communication channels</li>
+                                <li><strong>Market Segmentation:</strong> Use AI-powered tools to identify high-value customer segments and lookalike audiences</li>
+                                <li><strong>Technology Setup:</strong> Implement tracking pixels, analytics tools, CRM integration, and marketing automation platforms</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-phase">
+                        <div class="phase-number">2</div>
+                        <div class="phase-content">
+                            <h5>Weeks 3-4: Creative Development & Testing</h5>
+                            <div class="phase-budget">Budget: 25% of total</div>
+                            <ul>
+                                <li><strong>Creative Asset Development:</strong> Design 15+ ad variations, video content, and interactive elements for A/B testing</li>
+                                <li><strong>Content Strategy:</strong> Develop content calendar with 60+ pieces including blogs, social posts, videos, and email sequences</li>
+                                <li><strong>Landing Page Optimization:</strong> Create mobile-first landing pages with conversion rate optimization techniques</li>
+                                <li><strong>Soft Launch Testing:</strong> Limited audience testing (10% of budget) across 3-5 key segments</li>
+                                <li><strong>Performance Baseline:</strong> Establish KPI benchmarks and attribution models for accurate measurement</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-phase">
+                        <div class="phase-number">3</div>
+                        <div class="phase-content">
+                            <h5>Weeks 5-8: Full Campaign Launch</h5>
+                            <div class="phase-budget">Budget: 45% of total</div>
+                            <ul>
+                                <li><strong>Multi-Channel Activation:</strong> Launch across paid social, search, display, video, and influencer partnerships simultaneously</li>
+                                <li><strong>Real-time Optimization:</strong> Daily performance monitoring with automated budget reallocation to high-performing segments</li>
+                                <li><strong>Influencer Campaigns:</strong> Activate 25-50 micro-influencers and 3-5 macro-influencers for maximum reach and authenticity</li>
+                                <li><strong>Community Engagement:</strong> Social listening, customer service excellence, and user-generated content amplification</li>
+                                <li><strong>Weekly Reviews:</strong> Performance analysis and strategy adjustments based on real-time data insights</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-phase">
+                        <div class="phase-number">4</div>
+                        <div class="phase-content">
+                            <h5>Weeks 9-12: Optimization & Scale</h5>
+                            <div class="phase-budget">Budget: 15% of total</div>
+                            <ul>
+                                <li><strong>Performance Analysis:</strong> Comprehensive ROI analysis, customer journey mapping, and attribution modeling</li>
+                                <li><strong>Scaling Strategies:</strong> Increase budget for top-performing segments and creative variations by 50-100%</li>
+                                <li><strong>Retention Focus:</strong> Implement loyalty programs, email nurture sequences, and customer advocacy initiatives</li>
+                                <li><strong>Future Planning:</strong> Document learnings, update customer personas, and plan follow-up campaigns</li>
+                                <li><strong>Reporting & Insights:</strong> Create detailed performance reports with actionable insights for stakeholders</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Success Metrics Dashboard -->
+                <div class="success-metrics-dashboard">
+                    <h4>📊 Expected Success Metrics</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">🎯</div>
+                            <div class="metric-value">156%</div>
+                            <div class="metric-label">Expected ROI</div>
+                            <div class="metric-benchmark">vs. 89% industry avg</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">📈</div>
+                            <div class="metric-value">67%</div>
+                            <div class="metric-label">Conversion Rate Increase</div>
+                            <div class="metric-benchmark">vs. 23% typical improvement</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">👥</div>
+                            <div class="metric-value">2.3M+</div>
+                            <div class="metric-label">Projected Reach</div>
+                            <div class="metric-benchmark">across all channels</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">💰</div>
+                            <div class="metric-value">34%</div>
+                            <div class="metric-label">Cost Reduction</div>
+                            <div class="metric-benchmark">in customer acquisition</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
